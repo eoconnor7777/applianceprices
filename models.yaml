@@ -96,6 +96,7 @@ retailers:
     strategy: auto
     fresh_browser: true
     warmup_url: "https://www.harveynorman.ie/"
+    stealth: true
 
   - key: currys
     name: Currys IE

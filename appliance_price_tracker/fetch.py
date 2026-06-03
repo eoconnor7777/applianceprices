@@ -83,8 +83,9 @@ class Renderer:
         self._pw = None
         self._browser = None
 
-    def _launch(self):
-        return self._pw.chromium.launch(headless=self.headless, args=_LAUNCH_ARGS)
+    def _launch(self, stealth: bool = False):
+        args = _LAUNCH_ARGS if stealth else []
+        return self._pw.chromium.launch(headless=self.headless, args=args)
 
     def __enter__(self) -> "Renderer":
         sync_playwright = _require_playwright()
@@ -93,18 +94,23 @@ class Renderer:
         return self
 
     def render(self, url: str, timeout: float = 30.0,
-               fresh_browser: bool = False, warmup_url: str = "") -> str:
+               fresh_browser: bool = False, warmup_url: str = "",
+               stealth: bool = False) -> str:
         """Return fully rendered HTML for `url` from a fresh, isolated context.
 
         `fresh_browser` launches a throwaway browser process for this one page
         (for bot-protected sites). `warmup_url` is visited first in the same
-        context to let a JS bot-challenge solve.
+        context to let a JS bot-challenge solve. `stealth` injects WAF-evasion
+        init script + launch args; it empirically HURTS some bot-protected sites
+        (Currys/DID returned fewer matches with it on), so it's opt-in per
+        retailer and reserved for the ones a plain fresh browser can't crack.
         """
-        browser = self._launch() if fresh_browser else self._browser
+        browser = self._launch(stealth=stealth) if fresh_browser else self._browser
         try:
             ctx = browser.new_context(user_agent=_DEF_UA, locale="en-IE",
                                       viewport={"width": 1366, "height": 900})
-            ctx.add_init_script(_STEALTH_JS)
+            if stealth:
+                ctx.add_init_script(_STEALTH_JS)
             if self.block_assets:
                 ctx.route("**/*", _block_heavy_assets)
             page = ctx.new_page()
@@ -126,7 +132,7 @@ class Renderer:
                     pass
                 _dismiss_cookies(page)
                 page.wait_for_timeout(self.settle_ms)
-                return page.content()
+                return _content_when_settled(page)
             finally:
                 try:
                     ctx.close()
@@ -159,6 +165,28 @@ def render(url: str, timeout: float = 30.0, headless: bool = True,
     """
     with Renderer(headless=headless, settle_ms=settle_ms) as r:
         return r.render(url, timeout=timeout)
+
+
+def _content_when_settled(page, attempts: int = 4) -> str:
+    """Read page.content(), retrying past an in-flight client-side redirect.
+
+    SFCC sites (Currys) 301 an exact-SKU search to the product page via a
+    client-side navigation; if we read while that's mid-flight Playwright raises
+    "Unable to retrieve content because the page is navigating". Wait for the
+    DOM to settle and retry rather than losing the page.
+    """
+    for i in range(attempts):
+        try:
+            return page.content()
+        except Exception:
+            if i == attempts - 1:
+                raise
+            try:
+                page.wait_for_load_state("domcontentloaded", timeout=5000)
+            except Exception:
+                pass
+            page.wait_for_timeout(500)
+    return page.content()
 
 
 def _block_heavy_assets(route) -> None:

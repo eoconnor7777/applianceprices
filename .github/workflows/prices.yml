@@ -27,10 +27,11 @@ jobs:
         run: |
           pip install -r requirements.txt
           python -m playwright install --with-deps chromium
-      - name: Track prices and build the board
-        run: |
-          python -m appliance_price_tracker.cli track
-          python -m appliance_price_tracker.cli report --out site/index.html
+      - name: Track prices
+        run: python -m appliance_price_tracker.cli track || echo "track exited non-zero; building board from existing history"
+      - name: Build the board
+        if: always()
+        run: python -m appliance_price_tracker.cli report --out site/index.html
       - name: Persist price history
         run: |
           git config user.name "prices-bot"

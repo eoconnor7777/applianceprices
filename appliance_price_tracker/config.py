@@ -48,6 +48,10 @@ class Retailer:
     # Visit this URL first (same context) so a JS bot-challenge can solve before
     # the search request - e.g. an Incapsula homepage that mints incap_ses.
     warmup_url: str = ""
+    # Inject WAF-evasion stealth (navigator.webdriver spoof etc.) + launch args.
+    # Opt-in: it HURTS Currys/DID coverage, so reserve it for sites a plain
+    # fresh browser can't crack (Harvey Norman / Incapsula).
+    stealth: bool = False
 
 
 @dataclass
