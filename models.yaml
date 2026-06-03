@@ -88,10 +88,12 @@ retailers:
 
   - key: harveynorman
     name: Harvey Norman
-    # Behind Imperva Incapsula (incap_ses_* cookie + JS challenge). Plain HTTP
-    # gets a 212-byte block; we use a fresh stealth browser and warm up the
-    # homepage first so the JS challenge can solve and set the cookie before the
-    # CS-Cart/Attraqt search. May still fail if Incapsula flags headless.
+    # DISABLED: behind Imperva Incapsula (incap_ses_* cookie + JS challenge).
+    # A fresh stealth browser + homepage warmup did NOT pass the challenge from
+    # CI's datacenter IP (0/7, repeatedly). Beating it needs a residential proxy
+    # or a paid scraping API. Config kept so it can be re-enabled if one's added:
+    # flip enabled back to true.
+    enabled: false
     search_url: "https://www.harveynorman.ie/index.php?dispatch=products.search&q={query}"
     strategy: auto
     fresh_browser: true
