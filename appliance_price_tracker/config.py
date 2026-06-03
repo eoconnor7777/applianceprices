@@ -40,8 +40,14 @@ class Retailer:
     key: str
     name: str
     search_url: str                       # must contain "{query}"
-    strategy: str = "auto"                # "jsonld" | "text" | "auto"
+    strategy: str = "auto"                # "jsonld" | "text" | "auto" | "buyitdirect"
     enabled: bool = True
+    # Bot-protected sites: launch a fresh browser process per page (slower, but
+    # the only thing that reliably beats their fingerprinting from CI).
+    fresh_browser: bool = False
+    # Visit this URL first (same context) so a JS bot-challenge can solve before
+    # the search request - e.g. an Incapsula homepage that mints incap_ses.
+    warmup_url: str = ""
 
 
 @dataclass

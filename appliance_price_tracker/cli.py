@@ -37,7 +37,9 @@ def _html_for(retailer, product, args, renderer) -> tuple[str | None, str, str]:
     from .fetch import polite_sleep
     url = retailer.search_url.format(query=quote_plus(query))
     try:
-        html = renderer.render(url, timeout=args.timeout)
+        html = renderer.render(url, timeout=args.timeout,
+                               fresh_browser=retailer.fresh_browser,
+                               warmup_url=retailer.warmup_url)
         polite_sleep(args.delay)
         return html, query, "ok"
     except Exception as exc:                       # noqa: BLE001

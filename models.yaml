@@ -80,29 +80,34 @@ retailers:
 
   - key: did
     name: DID Electrical
+    # Bot-protected: a long-lived shared browser gets empty results after the
+    # first hit, so use a fresh browser process per page (see fresh_browser).
     search_url: "https://www.did.ie/search?q={query}"
     strategy: auto
+    fresh_browser: true
 
   - key: harveynorman
     name: Harvey Norman
-    # DISABLED: site is behind Imperva Incapsula bot protection (incap_ses_*
-    # cookie + JS challenge). Direct requests get a 212-byte block and headless
-    # Chromium gets the challenge page, so search returns zero products. Would
-    # need a stealth browser + residential proxy (or a paid API) to scrape.
+    # Behind Imperva Incapsula (incap_ses_* cookie + JS challenge). Plain HTTP
+    # gets a 212-byte block; we use a fresh stealth browser and warm up the
+    # homepage first so the JS challenge can solve and set the cookie before the
+    # CS-Cart/Attraqt search. May still fail if Incapsula flags headless.
     search_url: "https://www.harveynorman.ie/index.php?dispatch=products.search&q={query}"
     strategy: auto
-    enabled: false
+    fresh_browser: true
+    warmup_url: "https://www.harveynorman.ie/"
 
   - key: currys
     name: Currys IE
-    # Bot-protected: plain HTTP from a datacenter IP gets 403 (blocked on the
-    # Python TLS fingerprint), so we MUST use the real browser. An exact-SKU
-    # search 301s to the product page, which carries clean JSON-LD - parse that
-    # (the text scraper produced a €500 finance-price false match here). Headless
-    # still gets intermittent challenges, so coverage is partial run-to-run; the
-    # report's "lowest ever" column accumulates good prices over time.
+    # Bot-protected: plain HTTP from a datacenter IP gets 403 (Python TLS
+    # fingerprint), and a shared browser gets intermittent challenges. Use a
+    # fresh browser process per page (best coverage). An exact-SKU search 301s
+    # to the product page, whose clean JSON-LD we parse (the text scraper hit a
+    # €500 finance-price false match here). Oven/hob load via Currys' SFCC
+    # search API (JS) and stay unmatched.
     search_url: "https://www.currys.ie/search?q={query}"
     strategy: jsonld
+    fresh_browser: true
 
   - key: buyitdirect
     name: Buy It Direct

@@ -47,24 +47,32 @@ def _require_playwright():
         ) from exc
 
 
+# Hide the headless tell-tales (navigator.webdriver etc.) that WAFs like
+# Incapsula key off. Applied as an init script to every context.
+_STEALTH_JS = (
+    "Object.defineProperty(navigator,'webdriver',{get:()=>undefined});"
+    "window.chrome={runtime:{}};"
+    "Object.defineProperty(navigator,'languages',{get:()=>['en-IE','en']});"
+    "Object.defineProperty(navigator,'plugins',{get:()=>[1,2,3,4,5]});"
+)
+_LAUNCH_ARGS = ["--disable-blink-features=AutomationControlled"]
+
+
 class Renderer:
-    """Reusable headless-browser session.
+    """Headless-browser session with a per-retailer speed/stealth trade-off.
 
-    Launch once, render many URLs, close once:
+    Launching Chromium is the dominant cost (~2s each), so by default the
+    browser is launched ONCE and each `render()` spins up a fresh, isolated
+    context+page on it (cheap, and avoids cross-request cookie bleed).
 
-        with Renderer() as r:
-            html = r.render(url)
+    Some retailers (Currys, DID) sit behind bot protection that fingerprints
+    the long-lived browser and starts returning empty results after the first
+    hit from a datacenter IP. For those, pass `fresh_browser=True` to get a
+    brand-new browser process per page - this mirrors the original (slow but
+    high-coverage) behaviour and is the only thing that reliably gets results.
 
-    Launching Chromium is the single dominant cost (a couple of seconds each),
-    so the browser is launched ONCE and kept alive for the whole run. Each
-    `render()` then spins up a FRESH context+page and disposes it afterwards:
-    creating a context is cheap (tens of ms) but - unlike reusing one page -
-    it gives every search a clean cookie/storage/session state. We learned the
-    hard way that a shared context degrades JS-rendered retailers (Currys, DID,
-    Harvey Norman): the first search returns results, then subsequent ones come
-    back with zero products as accumulated session state trips their bot/empty-
-    results paths. Fresh-context-per-render mirrors the old fresh-browser-per-
-    page behaviour that worked, without paying the Chromium-launch cost 35x.
+    `warmup_url` first navigates to a homepage in the SAME context so a JS
+    challenge (e.g. Incapsula's incap_ses cookie) can solve before the search.
     """
 
     def __init__(self, headless: bool = True, settle_ms: int = 800,
@@ -75,35 +83,61 @@ class Renderer:
         self._pw = None
         self._browser = None
 
+    def _launch(self):
+        return self._pw.chromium.launch(headless=self.headless, args=_LAUNCH_ARGS)
+
     def __enter__(self) -> "Renderer":
         sync_playwright = _require_playwright()
         self._pw = sync_playwright().start()
-        self._browser = self._pw.chromium.launch(headless=self.headless)
+        self._browser = self._launch()
         return self
 
-    def render(self, url: str, timeout: float = 30.0) -> str:
-        """Return fully rendered HTML for `url` using a fresh, isolated context."""
-        ctx = self._browser.new_context(user_agent=_DEF_UA, locale="en-IE")
-        if self.block_assets:
-            ctx.route("**/*", _block_heavy_assets)
-        page = ctx.new_page()
+    def render(self, url: str, timeout: float = 30.0,
+               fresh_browser: bool = False, warmup_url: str = "") -> str:
+        """Return fully rendered HTML for `url` from a fresh, isolated context.
+
+        `fresh_browser` launches a throwaway browser process for this one page
+        (for bot-protected sites). `warmup_url` is visited first in the same
+        context to let a JS bot-challenge solve.
+        """
+        browser = self._launch() if fresh_browser else self._browser
         try:
-            page.goto(url, timeout=int(timeout * 1000), wait_until="domcontentloaded")
+            ctx = browser.new_context(user_agent=_DEF_UA, locale="en-IE",
+                                      viewport={"width": 1366, "height": 900})
+            ctx.add_init_script(_STEALTH_JS)
+            if self.block_assets:
+                ctx.route("**/*", _block_heavy_assets)
+            page = ctx.new_page()
             try:
-                # Cap networkidle low: some sites poll forever and would otherwise
-                # burn the full timeout on every page. domcontentloaded + a short
-                # settle is enough for the price DOM/JSON-LD on a cold context.
-                page.wait_for_load_state("networkidle", timeout=8000)
-            except Exception:
-                pass
-            _dismiss_cookies(page)
-            page.wait_for_timeout(self.settle_ms)
-            return page.content()
+                if warmup_url:
+                    try:
+                        page.goto(warmup_url, timeout=int(timeout * 1000),
+                                  wait_until="domcontentloaded")
+                        page.wait_for_timeout(3500)   # let the JS challenge solve
+                    except Exception:
+                        pass
+                page.goto(url, timeout=int(timeout * 1000),
+                          wait_until="domcontentloaded")
+                try:
+                    # Cap networkidle low: some sites poll forever and would
+                    # otherwise burn the full timeout on every page.
+                    page.wait_for_load_state("networkidle", timeout=8000)
+                except Exception:
+                    pass
+                _dismiss_cookies(page)
+                page.wait_for_timeout(self.settle_ms)
+                return page.content()
+            finally:
+                try:
+                    ctx.close()
+                except Exception:
+                    pass
         finally:
-            try:
-                ctx.close()
-            except Exception:
-                pass
+            if fresh_browser:
+                try:
+                    browser.close()
+                except Exception:
+                    pass
 
     def __exit__(self, *exc) -> None:
         try:
