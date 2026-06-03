@@ -91,6 +91,20 @@ class Renderer:
         except Exception:
             pass
         _dismiss_cookies(page)
+        # SPA results (Currys etc.) arrive via XHR *after* networkidle reports
+        # idle - especially on a reused page where the shell is already cached,
+        # so networkidle fires almost instantly. Wait for a real price to land
+        # in the DOM before grabbing content; otherwise we snapshot an empty
+        # results grid and every product after the first comes back no_match.
+        # € is the euro sign; times out harmlessly on genuine no-result
+        # pages, then we fall through to the settle.
+        try:
+            page.wait_for_function(
+                "() => /\\u20AC\\s*\\d/.test(document.body.innerText)",
+                timeout=int(min(timeout, 12) * 1000),
+            )
+        except Exception:
+            pass
         page.wait_for_timeout(self.settle_ms)
         return page.content()
 
