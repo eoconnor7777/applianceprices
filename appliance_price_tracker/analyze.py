@@ -78,8 +78,8 @@ def render_report(cfg: AppConfig, all_rows: list[dict]) -> str:
     L.append(f"# Appliance price report\n\nLatest run: `{run_id}`\n")
 
     L.append("## Cheapest source per model\n")
-    L.append("| Model | Best price | Retailer | Lowest ever |")
-    L.append("|---|---|---|---|")
+    L.append("| Model | Model # | Best price | Retailer | Lowest ever |")
+    L.append("|---|---|---|---|---|")
     cheapest_sum = 0.0
     for p in cfg.products:
         b = bpp.get(p.key)
@@ -91,7 +91,8 @@ def render_report(cfg: AppConfig, all_rows: list[dict]) -> str:
         else:
             price, who = "—", "not found"
         ev = f"{sym}{e['price']:.2f}" if e else "—"
-        L.append(f"| {p.name} | {price} | {who} | {ev} |")
+        sku = p.model or "—"
+        L.append(f"| {p.name} | {sku} | {price} | {who} | {ev} |")
     L.append(f"\n**Cheapest-mix basket (one item each, best retailer): "
              f"{sym}{cheapest_sum:.2f}**\n")
 

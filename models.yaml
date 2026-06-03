@@ -37,18 +37,18 @@ products:
     exclude: ["70/30", "50/50", "under counter", larder]
 
   - key: dishwasher_bosch_s6_int
-    name: Bosch Series 6 fully integrated dishwasher
+    name: Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher
     brand: Bosch
-    model: ""
+    model: "SMV6ZCX10G"
     must_include: [[integrated], dishwasher]
     prefer: ["series 6", "fully integrated", 60cm]
 
   - key: oven_bosch_single
-    name: Bosch Series 6 built-in single oven
+    name: Bosch Series 6 HBG579BB6B built-in single oven (pyrolytic, black)
     brand: Bosch
-    model: ""
+    model: "HBG579BB6B"
     must_include: [[oven]]
-    prefer: ["series 6", single, "built in", pyrolytic]
+    prefer: ["series 6", single, "built in", pyrolytic, black]
     exclude: [microwave, combi, "air fry", compact]
 
   - key: combioven_bosch_s8_airfry
@@ -59,9 +59,9 @@ products:
     prefer: ["series 8", oven, "air fry", microwave]
 
   - key: ventinghob_bosch_s6
-    name: Bosch Series 6 venting induction hob
+    name: Bosch Series 6 PVQ731H26E 70cm venting induction hob
     brand: Bosch
-    model: ""
+    model: "PVQ731H26E"
     must_include: [[vent, ventilation, extractor, downdraft]]
     prefer: ["series 6", induction, integrated, 70cm]
 
@@ -91,6 +91,11 @@ retailers:
   - key: currys
     name: Currys IE
     search_url: "https://www.currys.ie/search?q={query}"
+    strategy: auto
+
+  - key: buyitdirect
+    name: Buy It Direct
+    search_url: "https://www.buyitdirect.ie/search?searchText={query}"
     strategy: auto
 
 # ---------------------------------------------------------------------------

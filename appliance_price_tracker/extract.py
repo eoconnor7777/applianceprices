@@ -21,6 +21,12 @@ from bs4 import BeautifulSoup
 
 PRICE_RE = re.compile(r"€\s*([\d.,]+)")
 
+# Appliances are never €0. Live pages sprinkle in €0.00 placeholders ("you
+# save €0.00", finance-from lines, the search-banner echo) that the text
+# scraper would otherwise latch onto first. Treat anything under this floor as
+# "not a real price" so we keep scanning for the genuine one.
+MIN_PRICE = 1.0
+
 
 @dataclass
 class Candidate:
@@ -86,8 +92,9 @@ def parse_jsonld(html: str) -> list[Candidate]:
                 url = offers.get("url")
                 avail = offers.get("availability")
             url = url or p.get("url") or p.get("@id")
-            if name and price is not None:
-                out.append(Candidate(str(name), _money(str(price)), url, _avail(avail)))
+            money = _money(str(price)) if price is not None else None
+            if name and money is not None and money >= MIN_PRICE:
+                out.append(Candidate(str(name), money, url, _avail(avail)))
     return out
 
 
@@ -103,9 +110,13 @@ def parse_text(html: str, brands: set[str]) -> list[Candidate]:
             continue
         for j in range(i + 1, min(i + 14, len(lines))):
             m = PRICE_RE.search(lines[j])
-            if m:
-                out.append(Candidate(line, _money(m.group(1))))
-                break
+            if not m:
+                continue
+            price = _money(m.group(1))
+            if price is None or price < MIN_PRICE:   # skip €0.00 placeholders
+                continue
+            out.append(Candidate(line, price))
+            break
     return out
 
 

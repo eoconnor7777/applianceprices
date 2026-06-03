@@ -24,9 +24,9 @@ def _now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _html_for(retailer, product, args) -> tuple[str | None, str, str]:
+def _html_for(retailer, product, args, renderer) -> tuple[str | None, str, str]:
     """Return (html, query, status). Reads a fixture in --mock mode, else
-    renders the live search page with Playwright."""
+    renders the live search page with the shared Playwright `renderer`."""
     query = product.query()
     if args.mock:
         path = os.path.join(args.mock, f"{retailer.key}.html")
@@ -34,10 +34,10 @@ def _html_for(retailer, product, args) -> tuple[str | None, str, str]:
             return None, query, "no_fixture"
         with open(path, encoding="utf-8") as fh:
             return fh.read(), query, "ok"
-    from .fetch import render, polite_sleep
+    from .fetch import polite_sleep
     url = retailer.search_url.format(query=quote_plus(query))
     try:
-        html = render(url, timeout=args.timeout)
+        html = renderer.render(url, timeout=args.timeout)
         polite_sleep(args.delay)
         return html, query, "ok"
     except Exception as exc:                       # noqa: BLE001
@@ -46,6 +46,17 @@ def _html_for(retailer, product, args) -> tuple[str | None, str, str]:
 
 
 def cmd_track(cfg: AppConfig, args) -> None:
+    if args.mock:
+        _run_track(cfg, args, renderer=None)
+        return
+    # One browser for the whole run - launching Chromium per page is the
+    # dominant cost otherwise.
+    from .fetch import Renderer
+    with Renderer() as renderer:
+        _run_track(cfg, args, renderer)
+
+
+def _run_track(cfg: AppConfig, args, renderer) -> None:
     run_id = _now_iso()
     brands = cfg.brands()
     rows: list[dict] = []
@@ -54,7 +65,7 @@ def cmd_track(cfg: AppConfig, args) -> None:
             continue
         print(f"[{retailer.name}]")
         for product in cfg.products:
-            html, query, fetch_status = _html_for(retailer, product, args)
+            html, query, fetch_status = _html_for(retailer, product, args, renderer)
             row = {
                 "timestamp": _now_iso(), "run_id": run_id,
                 "product_key": product.key, "product_name": product.name,
@@ -117,7 +128,7 @@ def build_parser() -> argparse.ArgumentParser:
     t = sub.add_parser("track", help="scrape retailers and append to history")
     t.add_argument("--mock", metavar="DIR",
                    help="read fixtures/<retailer>.html instead of live scraping")
-    t.add_argument("--delay", type=float, default=2.0,
+    t.add_argument("--delay", type=float, default=0.5,
                    help="seconds between live requests (be polite)")
     t.add_argument("--timeout", type=float, default=30.0)
     t.add_argument("--min-score", type=float, default=2.0, dest="min_score")

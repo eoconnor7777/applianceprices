@@ -105,8 +105,11 @@ def build_html(cfg: AppConfig, all_rows: list[dict]) -> str:
         ev = ever.get(p.key)
         ev_html = _money(sym, ev["price"]) if ev else "\u2014"
         best_ret = bpp[p.key]["retailer"] if p.key in bpp else "\u2014"
+        sku_html = (f'<span class="msku">{html.escape(p.model)}</span>'
+                    if p.model else "")
         body_rows.append(
             f'<tr><th scope="row"><span class="mname">{html.escape(p.name)}</span>'
+            f'{sku_html}'
             f'<span class="mmeta">best @ {html.escape(best_ret)} '
             f'\u00b7 low ever {ev_html}</span></th>{"".join(cells)}</tr>')
 
@@ -199,6 +202,9 @@ th.rhead{{border-left:1px solid #3a352b;}}
 tbody th[scope=row]{{text-align:left;padding:14px;border-top:1px solid var(--line);
   vertical-align:top;max-width:280px;}}
 .mname{{display:block;font-weight:600;font-size:15.5px;line-height:1.2;}}
+.msku{{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:500;
+  color:var(--clay);background:rgba(168,68,42,.08);border:1px solid var(--line);
+  border-radius:3px;padding:1px 6px;margin-top:6px;letter-spacing:.06em;}}
 .mmeta{{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);
   margin-top:5px;letter-spacing:.04em;}}
 td.cell{{border-top:1px solid var(--line);border-left:1px solid var(--line);
