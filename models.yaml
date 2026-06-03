@@ -85,7 +85,9 @@ retailers:
 
   - key: harveynorman
     name: Harvey Norman
-    search_url: "https://www.harveynorman.ie/catalogsearch/result/?q={query}"
+    # CS-Cart storefront (Attraqt-powered JS results grid). The old Magento-style
+    # /catalogsearch/result/ path 404s; this is the real search form action.
+    search_url: "https://www.harveynorman.ie/index.php?dispatch=products.search&q={query}"
     strategy: auto
 
   - key: currys
