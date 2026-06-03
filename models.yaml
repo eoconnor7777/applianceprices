@@ -1,0 +1,107 @@
+currency: EUR
+
+# ---------------------------------------------------------------------------
+# PRODUCTS = the exact variants you want to track.
+#   model        : drop in the precise SKU when you have it -> most accurate
+#                  match (a model-number hit scores highest). Leave "" to match
+#                  on name + must_include only.
+#   must_include : HARD filter that pins the variant. Each entry is a string
+#                  (must appear in the listing title) OR a list (any-of).
+#                  This is how we force "black" and "integrated" etc.
+#   prefer       : soft signals that raise the score but aren't required.
+# Confirm the model numbers marked TODO against the retailer/Bosch site.
+# ---------------------------------------------------------------------------
+products:
+  - key: washer_bosch_s6_black
+    name: Bosch Series 6 WGG244ZCGB 9kg washing machine (freestanding, black)
+    brand: Bosch
+    model: "WGG244ZCGB"
+    must_include: ["washing machine"]
+    prefer: ["series 6", 9kg, freestanding, 1400, black]
+    exclude: [integrated, "washer dryer", dishwasher]
+
+  - key: dryer_bosch_s6_hp_black
+    name: Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer (freestanding, black)
+    brand: Bosch
+    model: "WQG245R1GB"
+    must_include: [[dryer, tumble]]
+    prefer: ["series 6", "heat pump", 9kg, freestanding, black]
+    exclude: [integrated, "washer dryer", washing]
+
+  - key: fridge_bosch_kin96_int
+    name: Bosch Series 4 KIN96VFD0 XXL integrated 60/40 fridge freezer (193cm, 290L)
+    brand: Bosch
+    model: "KIN96VFD0"
+    must_include: [[integrated, "built in", "built-in"], ["fridge freezer", fridgefreezer]]
+    prefer: ["60/40", xxl, "extra tall", 290, "193"]
+    exclude: ["70/30", "50/50", "under counter", larder]
+
+  - key: dishwasher_bosch_s6_int
+    name: Bosch Series 6 fully integrated dishwasher
+    brand: Bosch
+    model: ""
+    must_include: [[integrated], dishwasher]
+    prefer: ["series 6", "fully integrated", 60cm]
+
+  - key: oven_bosch_single
+    name: Bosch Series 6 built-in single oven
+    brand: Bosch
+    model: ""
+    must_include: [[oven]]
+    prefer: ["series 6", single, "built in", pyrolytic]
+    exclude: [microwave, combi, "air fry", compact]
+
+  - key: combioven_bosch_s8_airfry
+    name: Bosch Series 8 combi oven with microwave + air fry
+    brand: Bosch
+    model: "HMG7764B1B"
+    must_include: [[microwave, combi, "air fry"]]
+    prefer: ["series 8", oven, "air fry", microwave]
+
+  - key: ventinghob_bosch_s6
+    name: Bosch Series 6 venting induction hob
+    brand: Bosch
+    model: ""
+    must_include: [[vent, ventilation, extractor, downdraft]]
+    prefer: ["series 6", induction, integrated, 70cm]
+
+# ---------------------------------------------------------------------------
+# RETAILERS = where to look. {query} is URL-encoded automatically.
+# strategy: jsonld | text | auto. Tweak per site if extraction comes back empty
+# (run `track`, look at the "N candidates" counts, then switch strategy).
+# Search-URL patterns below were observed working in mid-2026; verify if a site
+# is redesigned. Add more retailers freely.
+# ---------------------------------------------------------------------------
+retailers:
+  - key: powercity
+    name: Power City
+    search_url: "https://www.powercity.ie/groups/groups/search?search={query}"
+    strategy: text
+
+  - key: did
+    name: DID Electrical
+    search_url: "https://www.did.ie/search?q={query}"
+    strategy: auto
+
+  - key: harveynorman
+    name: Harvey Norman
+    search_url: "https://www.harveynorman.ie/catalogsearch/result/?q={query}"
+    strategy: auto
+
+  - key: currys
+    name: Currys IE
+    search_url: "https://www.currys.ie/search?q={query}"
+    strategy: auto
+
+# ---------------------------------------------------------------------------
+# DISCOUNTS used by `analyze` to estimate single-retailer bundle totals.
+# Set these from each retailer's stated terms. Multibuy maps item-count to a
+# fractional discount; bosch_bundle_flat is a flat € off a qualifying order.
+# (Defaults are 0 so totals stay honest until you fill in real terms.)
+# ---------------------------------------------------------------------------
+discounts:
+  bosch_bundle_flat: 250        # Power City "Bosch Kitchen Bundle up to €250"
+  bosch_bundle_min_items: 3
+  multibuy:
+    2: 0.0
+    3: 0.0
