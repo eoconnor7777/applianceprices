@@ -95,8 +95,10 @@ retailers:
 
   - key: buyitdirect
     name: Buy It Direct
-    search_url: "https://www.buyitdirect.ie/search?searchText={query}"
-    strategy: auto
+    # No stable results-page template; the autocomplete JSON API is the robust
+    # integration point. Parsed by the dedicated `buyitdirect` strategy.
+    search_url: "https://www.buyitdirect.ie/Search/Autocomplete?term={query}"
+    strategy: buyitdirect
 
 # ---------------------------------------------------------------------------
 # DISCOUNTS used by `analyze` to estimate single-retailer bundle totals.

@@ -120,11 +120,71 @@ def parse_text(html: str, brands: set[str]) -> list[Candidate]:
     return out
 
 
+# Buy It Direct has no stable "?q=" results-page template and no JSON-LD on
+# its search page (it redirects term searches to a JS-driven category grid).
+# Its autocomplete endpoint, however, returns clean JSON we can parse directly:
+#   /Search/Autocomplete?term={query}  ->  {"Products":[{WebTitle, URL, ItemPrice}]}
+# Skip refurbished/graded listings - we only track new stock.
+_BID_SKIP = ("refurbished", "grade a1", "graded")
+
+
+def _json_blob(text: str) -> dict | None:
+    """Return the parsed JSON object from `text`, tolerating a headless browser
+    that wraps a raw JSON response in <pre>...</pre> (or full HTML)."""
+    s = text.strip()
+    if s.startswith("{"):
+        try:
+            return json.loads(s)
+        except json.JSONDecodeError:
+            pass
+    inner = BeautifulSoup(text, "html.parser").get_text().strip()
+    if inner.startswith("{"):
+        try:
+            return json.loads(inner)
+        except json.JSONDecodeError:
+            pass
+    m = re.search(r"\{.*\}", text, re.DOTALL)
+    if m:
+        try:
+            return json.loads(m.group(0))
+        except json.JSONDecodeError:
+            return None
+    return None
+
+
+def parse_buyitdirect(html: str) -> list[Candidate]:
+    data = _json_blob(html)
+    if not data:
+        return []
+    out: list[Candidate] = []
+    for p in data.get("Products", []) or []:
+        title = (p.get("WebTitle") or "").strip()
+        if not title or any(s in title.lower() for s in _BID_SKIP):
+            continue
+        ip = p.get("ItemPrice") or {}
+        price = None
+        if isinstance(ip, dict):
+            disp = ip.get("Display")
+            if isinstance(disp, (int, float)):
+                price = round(float(disp), 2)
+            elif ip.get("DisplayPriceWithCurrency"):
+                m = PRICE_RE.search(str(ip["DisplayPriceWithCurrency"]))
+                price = _money(m.group(1)) if m else None
+        if price is None or price < MIN_PRICE:
+            continue
+        rel = (p.get("URL") or "").lstrip("/")
+        url = f"https://www.buyitdirect.ie/{rel}" if rel else None
+        out.append(Candidate(title, price, url))
+    return out
+
+
 def extract_candidates(html: str, strategy: str, brands: set[str]) -> list[Candidate]:
     if strategy == "jsonld":
         return parse_jsonld(html)
     if strategy == "text":
         return parse_text(html, brands)
+    if strategy == "buyitdirect":
+        return parse_buyitdirect(html)
     # auto: prefer structured data, fall back to text scraping
     cands = parse_jsonld(html)
     return cands if cands else parse_text(html, brands)
