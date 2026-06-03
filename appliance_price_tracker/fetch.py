@@ -55,8 +55,16 @@ class Renderer:
         with Renderer() as r:
             html = r.render(url)
 
-    Reusing the browser/context/page across the whole run is the single
-    biggest speed win versus launching Chromium per page.
+    Launching Chromium is the single dominant cost (a couple of seconds each),
+    so the browser is launched ONCE and kept alive for the whole run. Each
+    `render()` then spins up a FRESH context+page and disposes it afterwards:
+    creating a context is cheap (tens of ms) but - unlike reusing one page -
+    it gives every search a clean cookie/storage/session state. We learned the
+    hard way that a shared context degrades JS-rendered retailers (Currys, DID,
+    Harvey Norman): the first search returns results, then subsequent ones come
+    back with zero products as accumulated session state trips their bot/empty-
+    results paths. Fresh-context-per-render mirrors the old fresh-browser-per-
+    page behaviour that worked, without paying the Chromium-launch cost 35x.
     """
 
     def __init__(self, headless: bool = True, settle_ms: int = 800,
@@ -66,55 +74,43 @@ class Renderer:
         self.block_assets = block_assets
         self._pw = None
         self._browser = None
-        self._ctx = None
-        self._page = None
 
     def __enter__(self) -> "Renderer":
         sync_playwright = _require_playwright()
         self._pw = sync_playwright().start()
         self._browser = self._pw.chromium.launch(headless=self.headless)
-        self._ctx = self._browser.new_context(user_agent=_DEF_UA, locale="en-IE")
-        if self.block_assets:
-            self._ctx.route("**/*", _block_heavy_assets)
-        self._page = self._ctx.new_page()
         return self
 
     def render(self, url: str, timeout: float = 30.0) -> str:
-        """Return fully rendered HTML for `url`."""
-        page = self._page
-        page.goto(url, timeout=int(timeout * 1000), wait_until="domcontentloaded")
+        """Return fully rendered HTML for `url` using a fresh, isolated context."""
+        ctx = self._browser.new_context(user_agent=_DEF_UA, locale="en-IE")
+        if self.block_assets:
+            ctx.route("**/*", _block_heavy_assets)
+        page = ctx.new_page()
         try:
-            # Cap networkidle low: some sites poll forever and would otherwise
-            # burn the full timeout on every page. domcontentloaded + a short
-            # settle is enough for the price DOM/JSON-LD.
-            page.wait_for_load_state("networkidle", timeout=8000)
-        except Exception:
-            pass
-        _dismiss_cookies(page)
-        # SPA results (Currys etc.) arrive via XHR *after* networkidle reports
-        # idle - especially on a reused page where the shell is already cached,
-        # so networkidle fires almost instantly. Wait for a real price to land
-        # in the DOM before grabbing content; otherwise we snapshot an empty
-        # results grid and every product after the first comes back no_match.
-        # € is the euro sign; times out harmlessly on genuine no-result
-        # pages, then we fall through to the settle.
-        try:
-            page.wait_for_function(
-                "() => /\\u20AC\\s*\\d/.test(document.body.innerText)",
-                timeout=int(min(timeout, 12) * 1000),
-            )
-        except Exception:
-            pass
-        page.wait_for_timeout(self.settle_ms)
-        return page.content()
-
-    def __exit__(self, *exc) -> None:
-        for closer in (self._ctx, self._browser):
+            page.goto(url, timeout=int(timeout * 1000), wait_until="domcontentloaded")
             try:
-                if closer is not None:
-                    closer.close()
+                # Cap networkidle low: some sites poll forever and would otherwise
+                # burn the full timeout on every page. domcontentloaded + a short
+                # settle is enough for the price DOM/JSON-LD on a cold context.
+                page.wait_for_load_state("networkidle", timeout=8000)
             except Exception:
                 pass
+            _dismiss_cookies(page)
+            page.wait_for_timeout(self.settle_ms)
+            return page.content()
+        finally:
+            try:
+                ctx.close()
+            except Exception:
+                pass
+
+    def __exit__(self, *exc) -> None:
+        try:
+            if self._browser is not None:
+                self._browser.close()
+        except Exception:
+            pass
         if self._pw is not None:
             try:
                 self._pw.stop()
