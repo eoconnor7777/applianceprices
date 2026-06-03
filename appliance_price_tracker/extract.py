@@ -185,6 +185,8 @@ def extract_candidates(html: str, strategy: str, brands: set[str]) -> list[Candi
         return parse_text(html, brands)
     if strategy == "buyitdirect":
         return parse_buyitdirect(html)
+    if strategy == "jsonld_http":   # plain-HTTP fetch, structured-data parse
+        return parse_jsonld(html)
     # auto: prefer structured data, fall back to text scraping
     cands = parse_jsonld(html)
     return cands if cands else parse_text(html, brands)

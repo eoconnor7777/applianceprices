@@ -85,15 +85,21 @@ retailers:
 
   - key: harveynorman
     name: Harvey Norman
-    # CS-Cart storefront (Attraqt-powered JS results grid). The old Magento-style
-    # /catalogsearch/result/ path 404s; this is the real search form action.
+    # DISABLED: site is behind Imperva Incapsula bot protection (incap_ses_*
+    # cookie + JS challenge). Direct requests get a 212-byte block and headless
+    # Chromium gets the challenge page, so search returns zero products. Would
+    # need a stealth browser + residential proxy (or a paid API) to scrape.
     search_url: "https://www.harveynorman.ie/index.php?dispatch=products.search&q={query}"
     strategy: auto
+    enabled: false
 
   - key: currys
     name: Currys IE
+    # An exact-SKU search 301s server-side to the product page, whose price is in
+    # clean JSON-LD. Fetch over plain HTTP (jsonld_http) - faster and far more
+    # reliable than headless Chromium, which Currys serves flaky/empty results to.
     search_url: "https://www.currys.ie/search?q={query}"
-    strategy: auto
+    strategy: jsonld_http
 
   - key: buyitdirect
     name: Buy It Direct

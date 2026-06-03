@@ -24,9 +24,15 @@ def _now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+# Strategies fetched over plain HTTP (no headless browser): the page they need
+# is server-rendered (e.g. a SKU search that 301s to a JSON-LD product page).
+_HTTP_STRATEGIES = {"jsonld_http"}
+
+
 def _html_for(retailer, product, args, renderer) -> tuple[str | None, str, str]:
     """Return (html, query, status). Reads a fixture in --mock mode, else
-    renders the live search page with the shared Playwright `renderer`."""
+    fetches the live search page - over plain HTTP for `_HTTP_STRATEGIES`,
+    otherwise via the shared Playwright `renderer`."""
     query = product.query()
     if args.mock:
         path = os.path.join(args.mock, f"{retailer.key}.html")
@@ -34,14 +40,17 @@ def _html_for(retailer, product, args, renderer) -> tuple[str | None, str, str]:
             return None, query, "no_fixture"
         with open(path, encoding="utf-8") as fh:
             return fh.read(), query, "ok"
-    from .fetch import polite_sleep
+    from .fetch import http_get, polite_sleep
     url = retailer.search_url.format(query=quote_plus(query))
     try:
-        html = renderer.render(url, timeout=args.timeout)
+        if retailer.strategy in _HTTP_STRATEGIES:
+            html = http_get(url, timeout=args.timeout)
+        else:
+            html = renderer.render(url, timeout=args.timeout)
         polite_sleep(args.delay)
         return html, query, "ok"
     except Exception as exc:                       # noqa: BLE001
-        print(f"  ! {retailer.key}: render failed: {exc}", file=sys.stderr)
+        print(f"  ! {retailer.key}: fetch failed: {exc}", file=sys.stderr)
         return None, query, "error"
 
 
