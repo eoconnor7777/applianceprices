@@ -151,28 +151,6 @@ def _dismiss_cookies(page) -> None:
             continue
 
 
-def http_get(url: str, timeout: float = 30.0) -> str:
-    """Plain HTTP GET (stdlib only), following redirects, returning decoded text.
-
-    Some retailers (Currys) resolve an exact-SKU search with a *server-side*
-    301 to the product detail page, whose price lives in clean JSON-LD in the
-    initial HTML. For those, a browserless GET is faster AND more reliable than
-    headless Chromium, which these sites serve flaky/empty results to. No new
-    dependency: urllib ships with Python.
-    """
-    import urllib.request
-
-    req = urllib.request.Request(url, headers={
-        "User-Agent": _DEF_UA,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-IE,en;q=0.9",
-    })
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        raw = resp.read()
-        charset = resp.headers.get_content_charset() or "utf-8"
-    return raw.decode(charset, errors="replace")
-
-
 def polite_sleep(seconds: float) -> None:
     if seconds > 0:
         time.sleep(seconds)

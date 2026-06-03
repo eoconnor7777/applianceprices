@@ -95,11 +95,14 @@ retailers:
 
   - key: currys
     name: Currys IE
-    # An exact-SKU search 301s server-side to the product page, whose price is in
-    # clean JSON-LD. Fetch over plain HTTP (jsonld_http) - faster and far more
-    # reliable than headless Chromium, which Currys serves flaky/empty results to.
+    # Bot-protected: plain HTTP from a datacenter IP gets 403 (blocked on the
+    # Python TLS fingerprint), so we MUST use the real browser. An exact-SKU
+    # search 301s to the product page, which carries clean JSON-LD - parse that
+    # (the text scraper produced a €500 finance-price false match here). Headless
+    # still gets intermittent challenges, so coverage is partial run-to-run; the
+    # report's "lowest ever" column accumulates good prices over time.
     search_url: "https://www.currys.ie/search?q={query}"
-    strategy: jsonld_http
+    strategy: jsonld
 
   - key: buyitdirect
     name: Buy It Direct
