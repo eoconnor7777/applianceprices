@@ -1,0 +1,59 @@
+name: Appliance prices
+
+# Runs the tracker in the cloud - no local Python needed.
+on:
+  workflow_dispatch:           # manual "Run workflow" button
+  schedule:
+    - cron: "0 7 * * 1"        # every Monday 07:00 UTC
+
+permissions:
+  contents: write              # to commit price history back
+  pages: write                 # to publish the board
+  id-token: write
+
+concurrency:
+  group: prices
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies + browser
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Track prices and build the board
+        run: |
+          python -m appliance_price_tracker.cli track
+          python -m appliance_price_tracker.cli report --out site/index.html
+      - name: Persist price history
+        run: |
+          git config user.name "prices-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/prices_history.csv || true
+          git commit -m "Update prices $(date -u +%F)" || echo "no changes"
+          git push || echo "nothing to push"
+      - name: Upload board as downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: price-board
+          path: site/index.html
+      - name: Prepare Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.dep.outputs.page_url }}
+    steps:
+      - id: dep
+        uses: actions/deploy-pages@v4
