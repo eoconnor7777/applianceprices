@@ -116,6 +116,18 @@ def parse_text(html: str, brands: set[str]) -> list[Candidate]:
             if price is None or price < MIN_PRICE:   # skip €0.00 placeholders
                 continue
             out.append(Candidate(line, price))
+            # Additive merged-title candidate: some grids (Soundstore's Magento)
+            # split the product name across DOM nodes, so the brand line is just
+            # "Bosch Series 8" and the "...Oven"/"...Dishwasher" word lands on a
+            # separate, brand-less line that's never picked as a title. Join the
+            # lines of THIS card (brand line up to its price) into one title so
+            # must_include sees the product-type token. Bounded by the price, so
+            # it stays within a single card; emitted alongside (not instead of)
+            # the single-line candidate, so retailers that already work are
+            # untouched - best_match just picks the higher scorer.
+            merged = " ".join(lines[i:j])
+            if len(merged) > len(line) and len(merged) <= 200:
+                out.append(Candidate(merged, price))
             break
     return out
 
