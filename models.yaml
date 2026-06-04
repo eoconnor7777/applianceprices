@@ -12,29 +12,20 @@ currency: EUR
 # Confirm the model numbers marked TODO against the retailer/Bosch site.
 # ---------------------------------------------------------------------------
 products:
-  - key: washer_bosch_s6_black
-    name: Bosch Series 6 WGG244ZCGB 9kg washing machine (freestanding, black)
+  - key: oven_bosch_s8_single
+    name: Bosch Series 8 HBG7741B1B built-in single oven
     brand: Bosch
-    model: "WGG244ZCGB"
-    must_include: ["washing machine"]
-    prefer: ["series 6", 9kg, freestanding, 1400, black]
-    exclude: [integrated, "washer dryer", dishwasher]
+    model: "HBG7741B1B"
+    must_include: [[oven]]
+    prefer: ["series 8", single, "built in", "built-in", pyrolytic]
+    exclude: [microwave, combi, compact, "air fry"]
 
-  - key: dryer_bosch_s6_hp_black
-    name: Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer (freestanding, black)
+  - key: combioven_bosch_s8_micro
+    name: Bosch Series 8 CMG7241B1B compact oven with microwave
     brand: Bosch
-    model: "WQG245R1GB"
-    must_include: [[dryer, tumble]]
-    prefer: ["series 6", "heat pump", 9kg, freestanding, black]
-    exclude: [integrated, "washer dryer", washing]
-
-  - key: fridge_bosch_kin96_int
-    name: Bosch Series 4 KIN96VFD0 XXL integrated 60/40 fridge freezer (193cm, 290L)
-    brand: Bosch
-    model: "KIN96VFD0"
-    must_include: [[integrated, "built in", "built-in"], ["fridge freezer", fridgefreezer]]
-    prefer: ["60/40", xxl, "extra tall", 290, "193"]
-    exclude: ["70/30", "50/50", "under counter", larder]
+    model: "CMG7241B1B"
+    must_include: [[microwave, combi, compact]]
+    prefer: ["series 8", oven, microwave, compact, 45cm]
 
   - key: dishwasher_bosch_s6_int
     name: Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher
@@ -43,27 +34,21 @@ products:
     must_include: [[integrated], dishwasher]
     prefer: ["series 6", "fully integrated", 60cm]
 
-  - key: oven_bosch_single
-    name: Bosch Series 6 HBG579BB6B built-in single oven (pyrolytic, black)
+  - key: washer_bosch_s6
+    name: Bosch Series 6 WGG244ZCGB 9kg washing machine
     brand: Bosch
-    model: "HBG579BB6B"
-    must_include: [[oven]]
-    prefer: ["series 6", single, "built in", pyrolytic, black]
-    exclude: [microwave, combi, "air fry", compact]
+    model: "WGG244ZCGB"
+    must_include: ["washing machine"]
+    prefer: ["series 6", 9kg, freestanding, 1400]
+    exclude: [integrated, "washer dryer", dishwasher]
 
-  - key: combioven_bosch_s8_airfry
-    name: Bosch Series 8 combi oven with microwave + air fry
+  - key: dryer_bosch_s6_hp
+    name: Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer
     brand: Bosch
-    model: "HMG7764B1B"
-    must_include: [[microwave, combi, "air fry"]]
-    prefer: ["series 8", oven, "air fry", microwave]
-
-  - key: ventinghob_bosch_s6
-    name: Bosch Series 6 PVQ731H26E 70cm venting induction hob
-    brand: Bosch
-    model: "PVQ731H26E"
-    must_include: [[vent, ventilation, extractor, downdraft]]
-    prefer: ["series 6", induction, integrated, 70cm]
+    model: "WQG245R1GB"
+    must_include: [[dryer, tumble]]
+    prefer: ["series 6", "heat pump", 9kg, freestanding]
+    exclude: [integrated, "washer dryer", washing]
 
 # ---------------------------------------------------------------------------
 # RETAILERS = where to look. {query} is URL-encoded automatically.
@@ -118,6 +103,23 @@ retailers:
     # integration point. Parsed by the dedicated `buyitdirect` strategy.
     search_url: "https://www.buyitdirect.ie/Search/Autocomplete?term={query}"
     strategy: buyitdirect
+
+  - key: euronics
+    name: Euronics IE
+    # Shopify storefront: the standard /search?q= returns a clean product grid
+    # with embedded Product JSON-LD. Stable (no bot wall observed), so it rides
+    # the shared browser. Note: a missing exact SKU falls back to the nearest
+    # variant, so the matched title may be a sibling model - check it in-report.
+    search_url: "https://euronics.ie/search?q={query}"
+    strategy: auto
+
+  - key: soundstore
+    name: Soundstore
+    # Magento catalogsearch; the results grid is JS-rendered (a plain GET shows
+    # only the filter rail), so Playwright populates it. auto = JSON-LD first,
+    # then text scrape.
+    search_url: "https://www.soundstore.ie/catalogsearch/result/?q={query}"
+    strategy: auto
 
 # ---------------------------------------------------------------------------
 # DISCOUNTS used by `analyze` to estimate single-retailer bundle totals.
