@@ -63,3 +63,26 @@ def best_match(product: Product, candidates: list[Candidate], min_score: float =
     # Best score wins; tie-break on lowest price.
     scored.sort(key=lambda cs: (-cs[1], cs[0].price))
     return scored[0]
+
+
+def closest(product: Product, candidates: list[Candidate]):
+    """Diagnostic: the highest-scoring candidate IGNORING the min_score gate,
+    plus a one-word reason it didn't qualify. Lets `track` print *why* a page
+    came back no_match (failed must_include? excluded token? brand missing?)
+    so the YAML filters can be tuned without guessing. Returns
+    (candidate, score, reason) or None when there were no priced candidates."""
+    best = None
+    for c in candidates:
+        if c.price is None:
+            continue
+        title_norm = _norm(c.title)
+        if not _must_ok(title_norm, product.must_include):
+            sc, reason = -1.0, "must_include"
+        elif any(_contains(title_norm, x) for x in product.exclude):
+            sc, reason = -1.0, "excluded"
+        else:
+            sc = score(product, c)
+            reason = "ok" if sc >= 2.0 else "low_score"
+        if best is None or sc > best[1]:
+            best = (c, sc, reason)
+    return best

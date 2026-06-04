@@ -16,7 +16,7 @@ from . import analyze as analyze_mod
 from . import report_html
 from .config import AppConfig, load_config
 from .extract import extract_candidates
-from .match import best_match
+from .match import best_match, closest
 from .store import append_rows, load_rows
 
 
@@ -89,7 +89,12 @@ def _run_track(cfg: AppConfig, args, renderer) -> None:
                 print(f"  - {product.key:<28} €{cand.price:<9.2f} {cand.title[:48]}")
             else:
                 row["status"] = "no_match"
-                print(f"  - {product.key:<28} no_match ({len(cands)} candidates)")
+                diag = closest(product, cands)
+                extra = ""
+                if diag:
+                    c, dsc, reason = diag
+                    extra = f"  [closest: {reason} s={dsc:.1f} \"{c.title[:60]}\"]"
+                print(f"  - {product.key:<28} no_match ({len(cands)} candidates){extra}")
             rows.append(row)
     append_rows(args.history, rows)
     print(f"\nRecorded {len(rows)} rows -> {args.history}")

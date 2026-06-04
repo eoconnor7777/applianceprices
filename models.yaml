@@ -31,7 +31,7 @@ products:
     name: Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher
     brand: Bosch
     model: "SMV6ZCX10G"
-    must_include: [[integrated], dishwasher]
+    must_include: [[integrated, "built in", "built-in", "fully integrated"], dishwasher]
     prefer: ["series 6", "fully integrated", 60cm]
 
   - key: washer_bosch_s6
