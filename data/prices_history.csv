@@ -651,3 +651,33 @@ timestamp,run_id,product_key,product_name,retailer,query,matched_title,price,cur
 2026-07-13T10:20:35Z,2026-07-13T10:18:02Z,dishwasher_bosch_s6_int,Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher,soundstore,SMV6ZCX10G,,,EUR,,,,no_match
 2026-07-13T10:20:38Z,2026-07-13T10:18:02Z,washer_bosch_s6,Bosch Series 6 WGG244ZCGB 9kg washing machine,soundstore,WGG244ZCGB,,,EUR,,,,no_match
 2026-07-13T10:20:41Z,2026-07-13T10:18:02Z,dryer_bosch_s6_hp,Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer,soundstore,WQG245R1GB,,,EUR,,,,no_match
+2026-07-20T09:52:34Z,2026-07-20T09:52:28Z,oven_bosch_s8_single,Bosch Series 8 HBG7741B1B built-in single oven,powercity,HBG7741B1B,BOSCH            SERIES 8 BUILT IN SINGLE OVEN BLACK,979.95,EUR,,,4.0,ok
+2026-07-20T09:52:39Z,2026-07-20T09:52:28Z,combioven_bosch_s8_micro,Bosch Series 8 CMG7241B1B compact oven with microwave,powercity,CMG7241B1B,BOSCH            SERIES 8 COMBI COMPACT OVEN BUILT IN WITH MICROWAVE FUNCTION - BLACK,1219.95,EUR,,,4.0,ok
+2026-07-20T09:52:45Z,2026-07-20T09:52:28Z,dishwasher_bosch_s6_int,Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher,powercity,SMV6ZCX10G,BOSCH            SERIES 6 14 PLACE BUILT IN DISHWASHER WITH CUTLERY TRAY - HOME CONNECT - ZEOLITH DRYING,989.95,EUR,,,2.5,ok
+2026-07-20T09:52:50Z,2026-07-20T09:52:28Z,washer_bosch_s6,Bosch Series 6 WGG244ZCGB 9kg washing machine,powercity,WGG244ZCGB,BOSCH            SERIES 6 A RATED 9KG/1400SPIN WASHING MACHINE - GRAPHITE,679.95,EUR,,,3.5,ok
+2026-07-20T09:52:55Z,2026-07-20T09:52:28Z,dryer_bosch_s6_hp,Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer,powercity,WQG245R1GB,BOSCH            SERIES 6 9KG HEAT PUMP TUMBLE DRYER - CAST IRON COLOUR,929.95,EUR,,,3.5,ok
+2026-07-20T09:52:57Z,2026-07-20T09:52:28Z,oven_bosch_s8_single,Bosch Series 8 HBG7741B1B built-in single oven,did,HBG7741B1B,,,EUR,,,,no_match
+2026-07-20T09:53:00Z,2026-07-20T09:52:28Z,combioven_bosch_s8_micro,Bosch Series 8 CMG7241B1B compact oven with microwave,did,CMG7241B1B,,,EUR,,,,no_match
+2026-07-20T09:53:02Z,2026-07-20T09:52:28Z,dishwasher_bosch_s6_int,Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher,did,SMV6ZCX10G,,,EUR,,,,no_match
+2026-07-20T09:53:04Z,2026-07-20T09:52:28Z,washer_bosch_s6,Bosch Series 6 WGG244ZCGB 9kg washing machine,did,WGG244ZCGB,,,EUR,,,,no_match
+2026-07-20T09:53:06Z,2026-07-20T09:52:28Z,dryer_bosch_s6_hp,Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer,did,WQG245R1GB,,,EUR,,,,no_match
+2026-07-20T09:53:10Z,2026-07-20T09:52:28Z,oven_bosch_s8_single,Bosch Series 8 HBG7741B1B built-in single oven,currys,HBG7741B1B,,,EUR,,,,no_match
+2026-07-20T09:53:18Z,2026-07-20T09:52:28Z,combioven_bosch_s8_micro,Bosch Series 8 CMG7241B1B compact oven with microwave,currys,CMG7241B1B,BOSCH CMG7241B1B Built-in Combination Microwave - Black,1349.99,EUR,/products/bosch-cmg7241b1b-builtin-combination-microwave-black-10255283.html,True,7.5,ok
+2026-07-20T09:53:22Z,2026-07-20T09:52:28Z,dishwasher_bosch_s6_int,Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher,currys,SMV6ZCX10G,,,EUR,,,,no_match
+2026-07-20T09:53:26Z,2026-07-20T09:52:28Z,washer_bosch_s6,Bosch Series 6 WGG244ZCGB 9kg washing machine,currys,WGG244ZCGB,,,EUR,,,,no_match
+2026-07-20T09:53:34Z,2026-07-20T09:52:28Z,dryer_bosch_s6_hp,Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer,currys,WQG245R1GB,BOSCH Series 6 WQG245R1GB 9 kg Heat Pump Tumble Dryer - Grey,829.99,EUR,/products/bosch-series-6-wqg245r1gb-9-kg-heat-pump-tumble-dryer-grey-10282493.html,True,8.0,ok
+2026-07-20T09:53:36Z,2026-07-20T09:52:28Z,oven_bosch_s8_single,Bosch Series 8 HBG7741B1B built-in single oven,buyitdirect,HBG7741B1B,Bosch Series 8 HBG7741B1B Electric Self Cleaning Single Oven - Black,1069.97,EUR,https://www.buyitdirect.ie/p/bosch-series-8-electric-self-cleaning-single-oven-black-hbg7741b1b,,8.0,ok
+2026-07-20T09:53:38Z,2026-07-20T09:52:28Z,combioven_bosch_s8_micro,Bosch Series 8 CMG7241B1B compact oven with microwave,buyitdirect,CMG7241B1B,Bosch Series 8 Built-In Combination Microwave Oven - Black,1389.97,EUR,https://www.buyitdirect.ie/p/bosch-series-8-45l-built-in-combination-microwave-oven-black-cmg7241b1b,,3.5,ok
+2026-07-20T09:53:41Z,2026-07-20T09:52:28Z,dishwasher_bosch_s6_int,Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher,buyitdirect,SMV6ZCX10G,"Bosch Series 6 Integrated Dishwasher - Smart Wi-Fi, B-Rated, Silver control panel",1039.97,EUR,https://www.buyitdirect.ie/p/bosch-series-6-14-place-settings-integrated-dishwasher-smv6zcx10g,,2.5,ok
+2026-07-20T09:53:43Z,2026-07-20T09:52:28Z,washer_bosch_s6,Bosch Series 6 WGG244ZCGB 9kg washing machine,buyitdirect,WGG244ZCGB,Bosch Series 6 9kg 1400rpm Washing Machine - Graphite,739.97,EUR,https://www.buyitdirect.ie/p/bosch-series-6-9kg-1400rpm-washing-machine-graphite-wgg244zcgb,,3.5,ok
+2026-07-20T09:53:45Z,2026-07-20T09:52:28Z,dryer_bosch_s6_hp,Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer,buyitdirect,WQG245R1GB,,,EUR,,,,no_match
+2026-07-20T09:53:47Z,2026-07-20T09:52:28Z,oven_bosch_s8_single,Bosch Series 8 HBG7741B1B built-in single oven,euronics,HBG7741B1B,,,EUR,,,,no_match
+2026-07-20T09:53:49Z,2026-07-20T09:52:28Z,combioven_bosch_s8_micro,Bosch Series 8 CMG7241B1B compact oven with microwave,euronics,CMG7241B1B,,,EUR,,,,no_match
+2026-07-20T09:53:51Z,2026-07-20T09:52:28Z,dishwasher_bosch_s6_int,Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher,euronics,SMV6ZCX10G,,,EUR,,,,no_match
+2026-07-20T09:53:53Z,2026-07-20T09:52:28Z,washer_bosch_s6,Bosch Series 6 WGG244ZCGB 9kg washing machine,euronics,WGG244ZCGB,,,EUR,,,,no_match
+2026-07-20T09:53:55Z,2026-07-20T09:52:28Z,dryer_bosch_s6_hp,Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer,euronics,WQG245R1GB,,,EUR,,,,no_match
+2026-07-20T09:53:58Z,2026-07-20T09:52:28Z,oven_bosch_s8_single,Bosch Series 8 HBG7741B1B built-in single oven,soundstore,HBG7741B1B,,,EUR,,,,no_match
+2026-07-20T09:54:01Z,2026-07-20T09:52:28Z,combioven_bosch_s8_micro,Bosch Series 8 CMG7241B1B compact oven with microwave,soundstore,CMG7241B1B,,,EUR,,,,no_match
+2026-07-20T09:54:05Z,2026-07-20T09:52:28Z,dishwasher_bosch_s6_int,Bosch Series 6 SMV6ZCX10G 60cm fully integrated dishwasher,soundstore,SMV6ZCX10G,,,EUR,,,,no_match
+2026-07-20T09:54:08Z,2026-07-20T09:52:28Z,washer_bosch_s6,Bosch Series 6 WGG244ZCGB 9kg washing machine,soundstore,WGG244ZCGB,,,EUR,,,,no_match
+2026-07-20T09:54:11Z,2026-07-20T09:52:28Z,dryer_bosch_s6_hp,Bosch Series 6 WQG245R1GB 9kg heat pump tumble dryer,soundstore,WQG245R1GB,,,EUR,,,,no_match
