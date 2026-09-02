@@ -50,6 +50,33 @@ products:
     prefer: ["series 6", "heat pump", 9kg, freestanding]
     exclude: [integrated, "washer dryer", washing]
 
+  # Fridge freezers: three integrated built-in models across brands, compared
+  # like-for-like. Filter is brand-agnostic (integrated + fridge freezer) so the
+  # same shape works for Bosch/Liebherr/Whirlpool.
+  - key: fridge_bosch_kin96nse
+    name: Bosch KIN96NSE0G XXL integrated 60/40 fridge freezer
+    brand: Bosch
+    model: "KIN96NSE0G"
+    must_include: [[integrated, "built in", "built-in"], ["fridge freezer", fridgefreezer]]
+    prefer: ["60/40", xxl, "no frost", "frost free", "193"]
+    exclude: [larder, "under counter", "wine"]
+
+  - key: fridge_liebherr_icnsd5603
+    name: Liebherr ICNSD5603 integrated fridge freezer
+    brand: Liebherr
+    model: "ICNSD5603"
+    must_include: [[integrated, "built in", "built-in"], ["fridge freezer", fridgefreezer]]
+    prefer: [biofresh, "no frost", "frost free", "178"]
+    exclude: [larder, "under counter", "wine"]
+
+  - key: fridge_whirlpool_whc20t322
+    name: Whirlpool WHC20T322 integrated fridge freezer
+    brand: Whirlpool
+    model: "WHC20T322"
+    must_include: [[integrated, "built in", "built-in"], ["fridge freezer", fridgefreezer]]
+    prefer: ["no frost", "total no frost", "70/30", "frost free"]
+    exclude: [larder, "under counter", "wine"]
+
 # ---------------------------------------------------------------------------
 # RETAILERS = where to look. {query} is URL-encoded automatically.
 # strategy: jsonld | text | auto. Tweak per site if extraction comes back empty
